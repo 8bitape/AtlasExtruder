@@ -2,7 +2,7 @@ import json
 
 from PIL import Image
 
-def extrude(image, sprites):
+def extrude(image, sprites, padding):
 	im = Image.open(image)
 	pixels = im.load()
 	atlas = json.load(open(sprites, "r"))
@@ -11,19 +11,26 @@ def extrude(image, sprites):
 		x = atlas["frames"][frame]["frame"]["x"]
 		y = atlas["frames"][frame]["frame"]["y"]
 		width = atlas["frames"][frame]["sourceSize"]["w"]
-		height = atlas["frames"][frame]["sourceSize"]["h"]
+		height = atlas["frames"][frame]["sourceSize"]["h"]	
 
-		pixels[x - 1, y - 1] = pixels[x, y]
-		pixels[x - 1, y + height] = pixels[x, y + height - 1]
-		pixels[x + width, y - 1] = pixels[x + width - 1, y]
-		pixels[x + width, y + height] = pixels[x + width - 1, y + height - 1]
+		for i in range(padding):
+			for j in range (padding):
+				pixels[x - (i + 1), y - (j + 1)] = pixels[x, y]
+				pixels[x - (i + 1), y + (height + j)] = pixels[x, y + height - 1]
+				pixels[x + (width + i), y - (j + 1)] = pixels[x + width - 1, y]
+				pixels[x + (width + i), y + (height + j)] = pixels[x + width - 1, y + height - 1]	
 
 		for y in range(y, y + height):
-			pixels[x - 1, y] = pixels[x, y]
-			pixels[x + width, y] = pixels[x + width - 1, y]
+			for i in range(padding):
+				pixels[x - (i + 1), y] = pixels[x, y]
+				pixels[x + (width + i), y] = pixels[x + width - 1, y]
 
 		for x in range(x, x + width):
-			pixels[x, y + 1] = pixels[x, y]
-			pixels[x, y - height] = pixels[x, y - height + 1]
+			for i in range(padding):
+				pixels[x, y + (i + 1)] = pixels[x, y]
+				pixels[x, y - (height + i)] = pixels[x, y - height + 1]
+
+		
+			
 
 	im.save(image)
